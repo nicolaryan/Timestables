@@ -165,6 +165,16 @@
     </section>
   </main>
 
+  <div class="dialog-backdrop" id="dialog" hidden>
+    <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="dialog-text">
+      <p id="dialog-text"></p>
+      <div class="row">
+        <button class="soft-btn" id="dialog-cancel" type="button">Cancel</button>
+        <button class="soft-btn primary" id="dialog-ok" type="button">OK</button>
+      </div>
+    </div>
+  </div>
+
   <script src="js/game.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/sound.js"></script>

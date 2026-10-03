@@ -59,6 +59,22 @@
     show(target);
   }
 
+  // In-page confirmation (browser confirm() boxes are blocked in some app views).
+  let onConfirm = null;
+  function ask(text, okLabel, onOk) {
+    $('#dialog-text').textContent = text;
+    $('#dialog-ok').textContent = okLabel;
+    onConfirm = onOk;
+    $('#dialog').hidden = false;
+    $('#dialog-cancel').focus();
+  }
+  function closeDialog(ok) {
+    $('#dialog').hidden = true;
+    const fn = onConfirm;
+    onConfirm = null;
+    if (ok && fn) fn();
+  }
+
   // ---------- Who's playing ----------
 
   function renderPlayers() {
@@ -406,8 +422,10 @@
   // ---------- Events ----------
 
   document.addEventListener('click', e => {
+    if (e.target.id === 'dialog') { closeDialog(false); return; }
     const t = e.target.closest('button');
     if (!t) return;
+    if (t.id === 'dialog-ok' || t.id === 'dialog-cancel') { closeDialog(t.id === 'dialog-ok'); return; }
 
     if (t.dataset.go) { go(t.dataset.go); return; }
 
@@ -440,7 +458,7 @@
     }
     if (t.id === 'start' || t.id === 'again') { startRound(); return; }
     if (t.id === 'quit') {
-      if (confirm('Stop this round? It won’t count on the leaderboard.')) { round = null; go('home'); }
+      ask('Stop this round? It won’t count on the leaderboard.', 'Stop', () => { round = null; go('home'); });
       return;
     }
 
@@ -464,11 +482,11 @@
     }
     if (t.id === 'reset-player') {
       const target = data.players.find(x => x.id === progressPlayerId);
-      if (confirm(`Reset all of ${target.name}'s scores, puzzles and progress? This can't be undone.`)) {
+      ask(`Reset all of ${target.name}'s scores, puzzles and progress? This can't be undone.`, 'Reset', () => {
         Object.assign(target, Store.newPlayer(target.name, target.color), { id: target.id });
         save();
         renderSettings();
-      }
+      });
       return;
     }
     const row = t.closest('.player-row');
@@ -478,10 +496,14 @@
         const keys = Object.keys(PLAYER_COLORS);
         target.color = keys[(keys.indexOf(target.color) + 1) % keys.length];
       } else if (t.dataset.action === 'remove') {
-        if (!confirm(`Remove ${target.name} and all their scores?`)) return;
-        data.players = data.players.filter(x => x !== target);
-        if (data.currentPlayerId === target.id) data.currentPlayerId = null;
-        if (settingsReturn !== 'players' && !player()) settingsReturn = 'players';
+        ask(`Remove ${target.name} and all their scores?`, 'Remove', () => {
+          data.players = data.players.filter(x => x !== target);
+          if (data.currentPlayerId === target.id) data.currentPlayerId = null;
+          if (settingsReturn !== 'players' && !player()) settingsReturn = 'players';
+          save();
+          renderSettings();
+        });
+        return;
       }
       save();
       renderSettings();
@@ -501,6 +523,7 @@
 
   // Physical keyboards (iPad keyboard, laptop).
   document.addEventListener('keydown', e => {
+    if (!$('#dialog').hidden) { if (e.key === 'Escape') closeDialog(false); return; }
     if (screen !== 'game' || e.metaKey || e.ctrlKey || e.altKey) return;
     if (/^\d$/.test(e.key)) press(e.key);
     else if (e.key === 'Backspace') press('back');
