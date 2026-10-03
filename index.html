@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="color-scheme" content="light">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Times Tables">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Times Tables</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <canvas id="fx" aria-hidden="true"></canvas>
+
+  <main id="app">
+    <!-- Who's playing? -->
+    <section id="screen-players" class="screen">
+      <div class="bouncers" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <h1 class="title">Times Tables</h1>
+      <p class="lead">Who's playing?</p>
+      <div id="player-list" class="player-list"></div>
+      <button class="text-btn grown-ups" data-go="settings" type="button"></button>
+    </section>
+
+    <!-- Player home -->
+    <section id="screen-home" class="screen" hidden>
+      <header class="bar">
+        <button class="icon-btn" data-go="players" type="button" aria-label="Change player"></button>
+        <div class="bar-actions">
+          <button class="icon-btn" data-go="leaderboard" type="button" aria-label="Leaderboard"></button>
+          <button class="icon-btn" data-go="puzzle" type="button" aria-label="My puzzle"></button>
+        </div>
+      </header>
+      <div class="bouncers" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <h1 class="hello" id="hello"></h1>
+      <div class="to-beat" id="home-to-beat"></div>
+
+      <h2 class="label">Mode</h2>
+      <div class="segmented" id="mode-picker" role="radiogroup" aria-label="Mode">
+        <button type="button" role="radio" data-mode="m">×</button>
+        <button type="button" role="radio" data-mode="d">÷</button>
+        <button type="button" role="radio" data-mode="mix">× ÷</button>
+      </div>
+
+      <h2 class="label">Tables <button class="link" id="all-tables" type="button">All</button></h2>
+      <div class="chips" id="table-picker"></div>
+
+      <button class="big-btn" id="start" type="button">Start</button>
+      <button class="mini-puzzle" data-go="puzzle" type="button" id="home-puzzle"></button>
+    </section>
+
+    <!-- Playing -->
+    <section id="screen-game" class="screen game" hidden>
+      <header class="bar">
+        <button class="icon-btn" id="quit" type="button" aria-label="Stop this round"></button>
+        <div class="progress" id="progress" aria-hidden="true"></div>
+        <div class="score" aria-live="polite"><span id="score">0</span></div>
+      </header>
+      <p class="beat-line" id="beat-line"></p>
+
+      <div class="stage">
+        <div class="streak" id="streak" aria-live="polite"></div>
+        <p class="retry-tag" id="retry-tag" hidden>Have another go</p>
+        <div class="question" id="question"></div>
+        <div class="answer" id="answer" aria-live="polite"></div>
+        <div class="feedback" id="feedback" aria-live="polite"></div>
+        <div class="float-points" id="float-points" aria-hidden="true"></div>
+      </div>
+
+      <div class="keypad" id="keypad">
+        <button type="button" data-key="1">1</button><button type="button" data-key="2">2</button><button type="button" data-key="3">3</button>
+        <button type="button" data-key="4">4</button><button type="button" data-key="5">5</button><button type="button" data-key="6">6</button>
+        <button type="button" data-key="7">7</button><button type="button" data-key="8">8</button><button type="button" data-key="9">9</button>
+        <button type="button" data-key="back" class="key-back" aria-label="Delete">⌫</button>
+        <button type="button" data-key="0">0</button>
+        <button type="button" data-key="enter" class="key-enter" id="enter-key">Go</button>
+      </div>
+    </section>
+
+    <!-- End of round -->
+    <section id="screen-results" class="screen results" hidden>
+      <div class="bouncers" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <p class="result-head" id="result-head"></p>
+      <div class="result-score" id="result-score"></div>
+      <p class="result-detail" id="result-detail"></p>
+      <div class="placing" id="placing"></div>
+      <div class="pieces-card" id="pieces-card"></div>
+      <div class="result-actions">
+        <button class="big-btn" id="again" type="button">Play again</button>
+        <div class="row">
+          <button class="soft-btn" data-go="leaderboard" type="button">Leaderboard</button>
+          <button class="soft-btn" data-go="home" type="button">Home</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Leaderboard -->
+    <section id="screen-leaderboard" class="screen" hidden>
+      <header class="bar">
+        <button class="icon-btn" data-go="home" type="button" aria-label="Back"></button>
+      </header>
+      <h1 class="page-title" id="lb-title"></h1>
+      <p class="page-sub" id="lb-sub"></p>
+      <ol class="board" id="board"></ol>
+    </section>
+
+    <!-- Puzzle collection -->
+    <section id="screen-puzzle" class="screen" hidden>
+      <header class="bar">
+        <button class="icon-btn" data-go="home" type="button" aria-label="Back"></button>
+      </header>
+      <h1 class="page-title" id="pz-title"></h1>
+      <p class="page-sub" id="pz-sub"></p>
+      <div class="puzzle-big" id="puzzle-big"></div>
+      <p class="hint">Finish a round to win a piece.<br>Perfect rounds and new high scores win extra pieces!</p>
+      <h2 class="label" id="gallery-label">Finished puzzles</h2>
+      <div class="gallery" id="gallery"></div>
+    </section>
+
+    <!-- Grown-ups -->
+    <section id="screen-settings" class="screen settings" hidden>
+      <header class="bar">
+        <button class="icon-btn" data-go="back" type="button" aria-label="Back"></button>
+      </header>
+      <h1 class="page-title">Grown-ups</h1>
+
+      <div class="setting">
+        <span>Sound</span>
+        <button class="switch" id="sound-switch" type="button" role="switch" aria-label="Sound"></button>
+      </div>
+
+      <div class="setting stacked">
+        <span>Questions per round</span>
+        <div class="segmented small" id="length-picker" role="radiogroup" aria-label="Questions per round">
+          <button type="button" role="radio" data-len="5">5</button>
+          <button type="button" role="radio" data-len="10">10</button>
+          <button type="button" role="radio" data-len="15">15</button>
+          <button type="button" role="radio" data-len="20">20</button>
+        </div>
+        <small>Each round length has its own leaderboard, so scores stay fair.</small>
+      </div>
+
+      <h2 class="label">Players</h2>
+      <div id="player-edit"></div>
+      <button class="soft-btn" id="add-player" type="button">+ Add player</button>
+
+      <h2 class="label">Progress</h2>
+      <div class="chips player-tabs" id="progress-tabs"></div>
+      <div class="grid-wrap" id="fact-grid"></div>
+      <div class="legend">
+        <span><i class="good"></i>Knows it</span><span><i class="ok"></i>Getting there</span>
+        <span><i class="tricky"></i>Tricky</span><span><i class="unseen"></i>Not tried</span>
+      </div>
+      <p class="tricky-list" id="tricky-list"></p>
+      <button class="danger-btn" id="reset-player" type="button"></button>
+    </section>
+  </main>
+
+  <script src="js/game.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/effects.js"></script>
+  <script src="js/puzzle.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
